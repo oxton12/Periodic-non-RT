@@ -20,8 +20,8 @@ void* pi_loop(void* arg) {
     return NULL;
   }
 
-  clock_gettime(EVL_CLOCK_MONOTONIC, &start);
-  clock_gettime(EVL_CLOCK_MONOTONIC, &next_time);
+  clock_gettime(CLOCK_MONOTONIC, &start);
+  clock_gettime(CLOCK_MONOTONIC, &next_time);
 
   for (int i = 0; i < iterations; i++) {
     next_time.tv_nsec += 1e6;
@@ -38,11 +38,11 @@ void* pi_loop(void* arg) {
 
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_time, NULL);
 
-    clock_gettime(EVL_CLOCK_MONOTONIC, &current);
+    clock_gettime(CLOCK_MONOTONIC, &current);
     durations[i] = (current.tv_sec - start.tv_sec) * 1e9 +
                    (current.tv_nsec - start.tv_nsec);
-    clock_gettime(EVL_CLOCK_MONOTONIC, &start);
-    clock_gettime(EVL_CLOCK_MONOTONIC, &next_time);
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    clock_gettime(CLOCK_MONOTONIC, &next_time);
   }
 
   return durations;
