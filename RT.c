@@ -9,9 +9,9 @@
 void* pi_loop(void* arg) {
   int iterations = *(int*)arg;
 
-  struct timespec start, end, current;
+  struct timespec start, current, next_time;
 
-  long* durations = malloc(sizeof(long) * iterations);
+  long* durations = (long*)malloc(sizeof(long) * iterations);
   if (!durations) return NULL;
 
   /* Attach this POSIX thread to EVL */
@@ -21,7 +21,7 @@ void* pi_loop(void* arg) {
   }
 
   evl_read_clock(EVL_CLOCK_MONOTONIC, &start);
-  struct timespec next_time = start;
+  evl_read_clock(EVL_CLOCK_MONOTONIC, &next_time);
 
   for (int i = 0; i < iterations; i++) {
     next_time.tv_nsec += 1e6;
@@ -37,31 +37,43 @@ void* pi_loop(void* arg) {
     }
 
     evl_sleep_until(EVL_CLOCK_MONOTONIC, &next_time);
-  }
-  evl_read_clock(EVL_CLOCK_MONOTONIC, &end);
 
-  long* duration = (long*)malloc(sizeof(long));
-  *duration = (end.tv_sec - start.tv_sec) * 1e9 + (end.tv_nsec - start.tv_nsec);
-  return duration;
+    evl_read_clock(EVL_CLOCK_MONOTONIC, &current);
+    durations[i] = (current.tv_sec - start.tv_sec) * 1e9 +
+                   (current.tv_nsec - start.tv_nsec);
+    evl_read_clock(EVL_CLOCK_MONOTONIC, &start);
+    evl_read_clock(EVL_CLOCK_MONOTONIC, &next_time);
+  }
+
+  return durations;
 }
 
 int main() {
   pthread_t thread;
+  long* result;
   int iterations = 10000;
 
   mlockall(MCL_CURRENT | MCL_FUTURE);
 
   pthread_create(&thread, NULL, pi_loop, &iterations);
-  void* duration_ptr;
-  pthread_join(thread, &duration_ptr);
+  pthread_join(thread, &result);
 
   long duration_ns = *(long*)duration_ptr;
   double duration_ms = duration_ns / 1e6;
   double delay = duration_ms - iterations;
   double average_delay = delay / iterations;
 
+  double duration_ms = 0;
+  for (int i = 0; i < iterations; i++) {
+    duration_ms += result[i] / 10e6;
+  }
+
+  double delay = duration_ms - iterations;
+  double average_delay = delay / iterations;
+
   printf(
-      "Expected duration: %d ms \nReal duration: %f ms \nDelay: %f ms \nAvg "
+      "Expected duration: %d ms \nReal duration: %f ms \nDelay: %f ms "
+      "\nAvg "
       "Delay: "
       "%f ms\n",
       iterations, duration_ms, delay, average_delay);
