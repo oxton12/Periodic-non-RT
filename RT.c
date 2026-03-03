@@ -56,12 +56,7 @@ int main() {
   mlockall(MCL_CURRENT | MCL_FUTURE);
 
   pthread_create(&thread, NULL, pi_loop, &iterations);
-  pthread_join(thread, &result);
-
-  long duration_ns = *(long*)duration_ptr;
-  double duration_ms = duration_ns / 1e6;
-  double delay = duration_ms - iterations;
-  double average_delay = delay / iterations;
+  pthread_join(thread, (void**)&result);
 
   double duration_ms = 0;
   for (int i = 0; i < iterations; i++) {
