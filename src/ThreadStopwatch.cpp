@@ -8,19 +8,26 @@ ThreadStopwatch::ThreadStopwatch(int iterations, int calcIterations,
 
 void ThreadStopwatch::runTest(void* (*loaderFunc)(void*)) {
   pthread_t thread;
+
   long* result;
+  if (recordJitter_)
+    result = (long*)malloc(sizeof(long) * iterations_);
+  else
+    result = (long*)malloc(sizeof(long));
+  if (!result) perror("Memory allocation failed");
+
+  StopwatchArgs stopwatchArgs{iterations_, calcIterations_, recordJitter_,
+                              result};
 
   mlockall(MCL_CURRENT | MCL_FUTURE);
 
-  StopwatchArgs stopwatchArgs{iterations_, calcIterations_, recordJitter_};
-
   pthread_create(&thread, NULL, loaderFunc, &stopwatchArgs);
-  pthread_join(thread, (void**)&result);
+  pthread_join(thread, NULL);
 
-  if (!result) {
-    fprintf(stderr, "Thread failed\n");
-    return;
-  }
+  /*   if (!result) {
+      fprintf(stderr, "Thread failed\n");
+      return;
+    } */
 
   outputResult(result);
 
@@ -52,8 +59,8 @@ void ThreadStopwatch::outputResult(long* result) {
 void ThreadStopwatch::saveResult(long* result) {
   FILE* file = fopen("jitter.txt", "w");
   if (file == NULL) {
-    perror("Error opening file");
     free(result);
+    perror("Error opening file");
   }
 
   for (int i = 0; i < iterations_; i++) {

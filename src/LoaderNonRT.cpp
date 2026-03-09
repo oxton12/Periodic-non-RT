@@ -7,14 +7,15 @@ void* loaderNonRT(void* arg) {
   int iterations = threadArgs->iterations;
   int calcIterations = threadArgs->calcIterations;
   bool recordJitter = threadArgs->recordJitter;
+  long* result = threadArgs->result;
 
-  long* result;
-  if (recordJitter)
-    result = (long*)malloc(sizeof(long) * iterations);
-  else
-    result = (long*)malloc(sizeof(long));
+  /*   long* result;
+    if (recordJitter)
+      result = (long*)malloc(sizeof(long) * iterations);
+    else
+      result = (long*)malloc(sizeof(long));
 
-  if (!result) return NULL;
+    if (!result) return NULL; */
 
   struct timespec start, current, next_time;
 
@@ -48,7 +49,7 @@ void* loaderNonRT(void* arg) {
               (current.tv_nsec - start.tv_nsec);
   }
 
-  return result;
+  return NULL;
 }
 
 double piApprox(int iterations) {
