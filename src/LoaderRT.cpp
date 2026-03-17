@@ -1,6 +1,7 @@
 #include <LoaderNonRT.h>
 #include <ThreadStopwatchArgs.h>
 #include <evl/clock.h>
+#include <evl/mutex.h>
 #include <evl/thread.h>
 
 void* loaderRT(void* arg) {
@@ -12,16 +13,16 @@ void* loaderRT(void* arg) {
   long* result = threadArgs->result;
 
   /*   long* result;
-    if (recordJitter)
-      result = (long*)malloc(sizeof(long) * iterations);
-    else
-      result = (long*)malloc(sizeof(long));
+  if (recordJitter)
+    result = (long*)malloc(sizeof(long) * iterations);
+  else
+    result = (long*)malloc(sizeof(long));
 
-    if (!result) return NULL; */
+  if (!result) return NULL; */
 
   if (evl_attach_self("rt-worker") < 0) {
     perror("evl_attach_self");
-    return;
+    return NULL;
   }
 
   struct timespec start, current, next_time;

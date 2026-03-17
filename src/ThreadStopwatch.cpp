@@ -1,10 +1,11 @@
 #include "ThreadStopwatch.hpp"
 
 ThreadStopwatch::ThreadStopwatch(int iterations, int calcIterations,
-                                 bool recordJitter)
+                                 bool recordJitter, const pthread_attr_t* attr)
     : iterations_(iterations),
       calcIterations_(calcIterations),
-      recordJitter_(recordJitter) {}
+      recordJitter_(recordJitter),
+      attr_(attr) {}
 
 void ThreadStopwatch::runTest(void* (*loaderFunc)(void*)) {
   pthread_t thread;
@@ -14,14 +15,20 @@ void ThreadStopwatch::runTest(void* (*loaderFunc)(void*)) {
     result = (long*)malloc(sizeof(long) * iterations_);
   else
     result = (long*)malloc(sizeof(long));
-  if (!result) perror("Memory allocation failed");
+  if (!result) {
+    perror("Memory allocation failed");
+    return;
+  }
 
   StopwatchArgs stopwatchArgs{iterations_, calcIterations_, recordJitter_,
                               result};
 
-  mlockall(MCL_CURRENT | MCL_FUTURE);
+  if (mlockall(MCL_CURRENT | MCL_FUTURE)) {
+    perror("mlockall");
+    exit(EXIT_FAILURE);
+  }
 
-  pthread_create(&thread, NULL, loaderFunc, &stopwatchArgs);
+  pthread_create(&thread, attr_, loaderFunc, &stopwatchArgs);
   pthread_join(thread, NULL);
 
   /*   if (!result) {

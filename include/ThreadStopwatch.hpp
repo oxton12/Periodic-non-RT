@@ -6,7 +6,8 @@
 
 class ThreadStopwatch {
  public:
-  ThreadStopwatch(int iterations, int calcIterations, bool recordJitter);
+  ThreadStopwatch(int iterations, int calcIterations, bool recordJitter,
+                  const pthread_attr_t* attr);
 
   void runTest(void* (*loaderFunc)(void*));
 
@@ -14,6 +15,7 @@ class ThreadStopwatch {
   int iterations_;
   int calcIterations_;
   bool recordJitter_;
+  const pthread_attr_t* attr_;
 
   void outputResult(long* result);
   void saveResult(long* result);
