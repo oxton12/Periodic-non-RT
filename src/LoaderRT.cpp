@@ -5,6 +5,8 @@
 #include <evl/thread.h>
 #include <stdio.h>
 
+static struct evl_mutex rt_mutex;  // mutex struct
+
 void* loaderRT(void* arg) {
   StopwatchArgs* threadArgs = (StopwatchArgs*)arg;
 
@@ -20,32 +22,31 @@ void* loaderRT(void* arg) {
     return NULL;
   }
 
-  evl_read_clock(CLOCK_MONOTONIC, &start);
-  evl_read_clock(CLOCK_MONOTONIC, &next_time);
+  evl_read_clock(EVL_CLOCK_MONOTONIC, &start);
+  evl_read_clock(EVL_CLOCK_MONOTONIC, &next_time);
 
   for (int i = 0; i < iterations; i++) {
     next_time.tv_nsec += 1e6;
-
-    if (next_time.tv_nsec >= 1e9) {
+    while (next_time.tv_nsec >= 1e9) {
       next_time.tv_sec++;
       next_time.tv_nsec -= 1e9;
     }
 
     incrementinator(calcIterations);
 
-    evl_sleep_until(CLOCK_MONOTONIC, &next_time);
+    evl_sleep_until(EVL_CLOCK_MONOTONIC, &next_time);
 
     if (recordJitter) {
-      evl_read_clock(CLOCK_MONOTONIC, &current);
+      evl_read_clock(EVL_CLOCK_MONOTONIC, &current);
       result[i] = (current.tv_sec - start.tv_sec) * 1e9 +
                   (current.tv_nsec - start.tv_nsec);
-      evl_read_clock(CLOCK_MONOTONIC, &next_time);
-      evl_read_clock(CLOCK_MONOTONIC, &start);
+      evl_read_clock(EVL_CLOCK_MONOTONIC, &next_time);
+      evl_read_clock(EVL_CLOCK_MONOTONIC, &start);
     }
   }
 
   if (!recordJitter) {
-    evl_read_clock(CLOCK_MONOTONIC, &current);
+    evl_read_clock(EVL_CLOCK_MONOTONIC, &current);
     *result = (current.tv_sec - start.tv_sec) * 1e9 +
               (current.tv_nsec - start.tv_nsec);
   }
