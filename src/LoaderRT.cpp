@@ -2,6 +2,7 @@
 #include <ThreadStopwatchArgs.h>
 #include <evl/clock.h>
 #include <evl/mutex.h>
+#include <evl/sched.h>
 #include <evl/thread.h>
 #include <stdio.h>
 
@@ -17,10 +18,16 @@ void* loaderRT(void* arg) {
 
   struct timespec start, current, next_time;
 
+  struct evl_sched_attrs attr;
+  attr.sched_policy = SCHED_FIFO;
+  attr.sched_priority = 80;
+
   if (evl_attach_self("rt-worker") < 0) {
     perror("evl_attach_self");
     return NULL;
   }
+
+  evl_set_schedattr(0, &attr);
 
   evl_read_clock(EVL_CLOCK_MONOTONIC, &start);
   evl_read_clock(EVL_CLOCK_MONOTONIC, &next_time);

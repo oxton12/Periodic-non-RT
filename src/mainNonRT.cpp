@@ -3,6 +3,6 @@
 #include <ThreadStopwatch.hpp>
 
 int main() {
-  ThreadStopwatch stopwatch = ThreadStopwatch(10000, 1000, false, NULL);
+  ThreadStopwatch stopwatch = ThreadStopwatch(10000, 150000, true, NULL);
   stopwatch.runTest(loaderNonRT);
 }
