@@ -3,6 +3,7 @@
 #include <evl/clock.h>
 #include <evl/mutex.h>
 #include <evl/thread.h>
+#include <stdio.h>
 
 void* loaderRT(void* arg) {
   StopwatchArgs* threadArgs = (StopwatchArgs*)arg;

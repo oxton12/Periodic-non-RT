@@ -1,7 +1,7 @@
 #include "ThreadStopwatch.hpp"
 
 ThreadStopwatch::ThreadStopwatch(int iterations, int calcIterations,
-                                 bool recordJitter, const pthread_attr_t* attr)
+                                 bool recordJitter, const evl_sched_attrs* attr)
     : iterations_(iterations),
       calcIterations_(calcIterations),
       recordJitter_(recordJitter),
