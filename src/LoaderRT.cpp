@@ -12,20 +12,12 @@ void* loaderRT(void* arg) {
   bool recordJitter = threadArgs->recordJitter;
   long* result = threadArgs->result;
 
-  /*   long* result;
-  if (recordJitter)
-    result = (long*)malloc(sizeof(long) * iterations);
-  else
-    result = (long*)malloc(sizeof(long));
-
-  if (!result) return NULL; */
+  struct timespec start, current, next_time;
 
   if (evl_attach_self("rt-worker") < 0) {
     perror("evl_attach_self");
     return NULL;
   }
-
-  struct timespec start, current, next_time;
 
   evl_read_clock(CLOCK_MONOTONIC, &start);
   evl_read_clock(CLOCK_MONOTONIC, &next_time);
@@ -38,7 +30,7 @@ void* loaderRT(void* arg) {
       next_time.tv_nsec -= 1e9;
     }
 
-    piApprox(calcIterations);
+    incrementinator(calcIterations);
 
     evl_sleep_until(CLOCK_MONOTONIC, &next_time);
 
@@ -58,12 +50,4 @@ void* loaderRT(void* arg) {
   }
 
   return NULL;
-}
-
-double piApprox(int iterations) {
-  double pi = 2;
-  for (int j = 2; j < iterations * 2 + 1; j += 2) {
-    pi *= j * j / ((j - 1) * (j + 1));
-  }
-  return pi;
 }

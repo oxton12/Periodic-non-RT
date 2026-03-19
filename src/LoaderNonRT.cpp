@@ -30,7 +30,7 @@ void* loaderNonRT(void* arg) {
       next_time.tv_nsec -= 1e9;
     }
 
-    piApprox(calcIterations);
+    incrementinator(calcIterations);
 
     clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next_time, NULL);
 
@@ -50,12 +50,4 @@ void* loaderNonRT(void* arg) {
   }
 
   return NULL;
-}
-
-double piApprox(int iterations) {
-  double pi = 2;
-  for (int j = 2; j < iterations * 2 + 1; j += 2) {
-    pi *= j * j / ((j - 1) * (j + 1));
-  }
-  return pi;
 }
