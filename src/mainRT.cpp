@@ -14,6 +14,6 @@ int main() {
   pthread_attr_setaffinity_np(&attr_thread, sizeof(cpu_set_t), &cpu_set);
 
   ThreadStopwatch stopwatch =
-      ThreadStopwatch(10000, 150000, false, &attr_thread);
+      ThreadStopwatch(10000, 150000, true, &attr_thread);
   stopwatch.runTest(loaderRT);
 }
